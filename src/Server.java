@@ -33,41 +33,49 @@ public class Server {
 
     //Starting a thread.
     public void start() {
-        System.out.println("The server is running, type 'exit'");
-        String command = "";
         portNumber = 8888;
-        try {
+        try{
             serverSocket = new ServerSocket(portNumber);
 
-        } catch (IOException socErr) {
-            System.err.println("Server not working");
+        } catch(IOException ioe){
+            ioe.printStackTrace();
         }
-        try {
-            clientSocket = serverSocket.accept();
-            command = bufR.readLine();
-            inputStream = new DataInputStream(clientSocket.getInputStream());
-            out = new PrintStream(clientSocket.getOutputStream());
 
-            while (true) {
-                host = inputStream.readUTF();
-                int data = inputStream.read();
-                System.out.println(data+" "+host);
-                if (command.equals("exit")) {
-                    System.out.println("exit");
-                    bufR.close();
-                    clientSocket.close();
-                    break;
+        //Client Socket for each connection
+        while(true){
+            try{
+                clientSocket = serverSocket.accept();
+                PrintStream ps = new PrintStream(clientSocket.getOutputStream());
 
-                }
+            } catch (IOException ioe){
+                ioe.printStackTrace();
             }
-        } catch (IOException ioe) {
-            System.err.println("error");
-
-            close();
         }
     }
 
-    //Adding clients to map
+
+
+
+    public void close(){
+        try{
+            out.close();
+            inputStream.close();
+            bufR.close();
+            clientSocket.close();
+            serverSocket.close();
+
+        } catch (IOException ioe){
+            ioe.printStackTrace();
+        }
+    }
+    public static void main(String[] args){
+        Server serve = new Server();
+        serve.start();
+
+
+    }
+
+    /*//Adding clients to map
     public boolean updateUsers(String userName, InetAddress clientIP, int userPort, int servePort){
         if(onlineUsers.containsKey(userName)){
             ClientDetails ud = onlineUsers.get(userName);
@@ -109,23 +117,5 @@ public class Server {
             ioerr.printStackTrace();
         }
 
-    }
-    public void close(){
-        try{
-            out.close();
-            inputStream.close();
-            bufR.close();
-            clientSocket.close();
-            serverSocket.close();
-
-        } catch (IOException ioe){
-            ioe.printStackTrace();
-        }
-    }
-    public static void main(String[] args){
-        Server serve = new Server();
-        serve.start();
-
-
-    }
+    }*/
 }
