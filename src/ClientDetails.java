@@ -2,11 +2,13 @@ import java.net.InetAddress;
 
 public class ClientDetails {
     private String name;
+    private int idkey;
     private int port;
     private InetAddress ipAddress;
 
-    public ClientDetails(String name, InetAddress ip, int port){
+    public ClientDetails(String name, int idkey, InetAddress ip, int port){
         this.name = name;
+        this.idkey=idkey;
         this.port = port;
         ipAddress = ip;
     }
@@ -19,5 +21,8 @@ public class ClientDetails {
     }
     public InetAddress getIP(){
         return ipAddress;
+    }
+    public int getIdkey(){
+        return idkey;
     }
 }

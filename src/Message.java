@@ -17,7 +17,7 @@ public class Message implements Serializable{ //Serializable lets you send objec
     private int type;
     private String message;
     
-    Message(int type, String message){
+    Message(String message){
         this.type = type;
         this.message = message;
         }

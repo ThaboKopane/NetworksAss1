@@ -1,54 +1,75 @@
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
+import java.util.TimerTask;
 
 public class Client {
     //String name="";
-    String host = "localhost";
-    int port = 8888;
-    Socket socket = null;
+    //FOR now call it a final
+    public static final String HOST = "localhost";
+    public static final int  PORT = 8888;
+    Socket clientSocket = null;
+    ServerSocket serverSocket = null;
+    HashMap<Integer, ClientDetails> otherCLients;
+
+    Thread serverReceiver, clientReceiver;
     public static void main(String[] args) throws Exception{
-        Client client = new Client();
+        Client client = new Client(HOST, PORT);
 
         BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
         while(!bufR.equals("quit")){
             String reading = bufR.readLine();
-            client.SendToServer(reading);
+            client.SendToServer(reading, 10);
             System.out.println("Server Said(1): "+client.RecieveFromServer());
 
         }
-        /*client.SendToServer("Hey dude 1");
-        System.out.println("Server Said(1): "+client.RecieveFromServer());
-        client.SendToServer("Hey dude 2");
-        System.out.println("Server Said(2): "+client.RecieveFromServer());*/
+
         client.close();
     }
 
     Client(String _host, int _port) throws Exception{
-        host = _host;
-        port = _port;
-        socket = new Socket(host, port);
+
+        clientSocket = new Socket(HOST, PORT);
     }
     Client() throws Exception{
-        socket = new Socket(host, port);
+        clientSocket = new Socket(HOST, PORT);
     }
-    void SendToServer(String msg) throws Exception{
+
+    public void SendToServer(String msg, int idKey) throws Exception{
         //create output stream attached to socket
-        PrintWriter outToServer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+        PrintWriter outToServer = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
         //send msg to server
         outToServer.print(msg + '\n');
         outToServer.flush();
     }
-    String RecieveFromServer() throws Exception{
+    /*public void sendMessageToClient(ClientDetails user, String mes){
+        //Output stream attached to socket
+        try{
+            ObjectOutputStream output = new ObjectOutputStream(clientSocket.getOutputStream());
+
+
+        } catch (IOException ioe){
+            ioe.printStackTrace();
+        }
+
+    }*/
+    /*public void connectToClient(int idkey){
+        ClientDetails ud = otherCLients.get(idkey);
+        if(ud==null)
+            return;
+
+    }*/
+    public String RecieveFromServer() throws Exception{
         //create input stream attached to socket
-        BufferedReader inFromServer = new BufferedReader(new InputStreamReader (socket.getInputStream()));
+        BufferedReader inFromServer = new BufferedReader(new InputStreamReader (clientSocket.getInputStream()));
         //read line from server
         String res = inFromServer.readLine(); // if connection closes on server end, this throws java.net.SocketException
         return res;
     }
-    void close() throws IOException{
-        socket.close();
+    public void close() throws IOException{
+        clientSocket.close();
     }
-}
+
 
 
 
@@ -64,15 +85,19 @@ public class Client {
 
                  }
             }
-        }
+        }*/
 
       class ServerReceiver implements Runnable {
           public void run() {
               while (true) {
                   try {
-                      clientSocket = serverSocket.accept();
+                     /* clientSocket = serverSocket.accept();
                       InputStream in = clientSocket.getInputStream();
-                      int data = in.read();
+                      int data = in.read();*/
+
+                      BufferedReader inFromServer = new BufferedReader(new InputStreamReader (clientSocket.getInputStream()));
+                      //read line from server
+                      String res = inFromServer.readLine(); // if connection closes on server end, this throws java.net.SocketException
                   } catch (IOException io) {
                       io.printStackTrace();
                       continue;
@@ -87,9 +112,9 @@ public class Client {
         public void run(){
             while (true) {
                 try {
-                    clientSocket = serverSocket.accept();
-                    InputStream in = clientSocket.getInputStream();
-                    int data = in.read();
+                    BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    //read frim the other client
+                    String reading = inFromClient.readLine();
                 } catch (IOException io) {
                     io.printStackTrace();
                     continue;
@@ -103,9 +128,10 @@ public class Client {
       class stillOnline extends TimerTask{
         @Override
           public void run(){
-            throughSocket("Stillbreathing"+" "+clientSocket.getLocalPort(), serverSocket, ipAddress, PORT);
+            //throughSocket("Stillbreathing"+" "+clientSocket.getLocalPort(), serverSocket, ipAddress, PORT);
         }
-      }*/
+      }
+}
 
 
                        
