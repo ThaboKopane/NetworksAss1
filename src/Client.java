@@ -7,25 +7,61 @@ public class Client {
     //FOR now call it a final
     public static final String HOST = "localhost";
     public static final int  PORT = 8888;
-    private Socket clientSocket = null;
-    private ServerSocket serverSocket = null;
+
     private HashMap<String, ClientDetails> otherClients;
 
-    Client(String host, int _port) throws Exception{
+    /*Client(String host, int _port) throws Exception{
 
         clientSocket = new Socket(HOST, PORT);
         otherClients = new HashMap<String, ClientDetails>();
     }
     Client() throws Exception{
         clientSocket = new Socket(HOST, PORT);
-    }
+    }*/
 
-    public static void main(String[] args) throws Exception{
-        Client client = new Client(HOST, PORT);
-        //client.start();
+    public static void main(String[] args) throws UnknownHostException, IOException{
+
 
         BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("What is your name");
+        //local ip
+        InetAddress ip = InetAddress.getByName(HOST);
+
+        Socket clientSocket = new Socket(ip, PORT);
+
+        //Input and output
+        DataInputStream input = new DataInputStream(clientSocket.getInputStream());
+        DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
+
+        //New Threads
+        Thread sendMessage = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    //read the message to delive
+                    try{
+                        String msg = bufR.readLine();
+                        output.writeUTF(msg);
+                        output.flush();
+                    }catch (IOException ioe){ioe.printStackTrace();}
+                }
+            }
+        });
+
+        Thread readMessage = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    try{
+                        String msg = input.readUTF();
+                        System.out.println(msg);
+                    }catch (IOException ioe){ioe.printStackTrace();}
+                }
+            }
+        });
+        sendMessage.start();
+        readMessage.start();
+
+        /*System.out.println("What is your name");
         String name = bufR.readLine();
         if(!client.otherClients.containsKey(name)){
             client.otherClients.put(name, new ClientDetails(name, PORT));
@@ -49,10 +85,10 @@ public class Client {
 
         }
 
-        client.close();
+        client.close();*/
     }
 
-    public void SendToServer(String msg, int idKey) throws Exception{
+    /*public void SendToServer(String msg, int idKey) throws Exception{
         //create output stream attached to socket
         PrintWriter outToServer = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
         //send msg to server
@@ -79,7 +115,7 @@ public class Client {
     }
     public void close() throws IOException{
         clientSocket.close();
-    }
+    }*/
 
 
     /*public void start(){

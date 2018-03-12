@@ -11,44 +11,24 @@ public class Server {
 
     //Vector for active clients
     static Vector<Connection> connectionsVector = new Vector<>();
-    static int clientCounter =0;
-    private Connection connect;
-    static ServerSocket serverSocket;
-    static Socket clientSocket;
-    private ObjectOutputStream serverOutput;
-    private ObjectInputStream serverInput;
+    public static int clientCounter = 0;
 
-    public Server(int porting) throws Exception{
-        //create welcoming socket at port 6789
-        porting = PORT;
-        serverSocket = new ServerSocket(PORT);
-        clientSocket = serverSocket.accept();
-        this.serverOutput = serverOutput;
-        this.serverInput = serverInput;
-        //onlineClients = new HashMap<Integer, ClientDetails>();
-
-        /*while (true) {
-            //block on welcoming socket for contact by a client
-            clientSocket = serverSocket.accept();
-            // create thread for client
-            connect= new  Connection(clientSocket);
-
-        }*/
-    }
-    public static void main (String args[]) throws Exception{
-        Server serve = new  Server(PORT);
+    public static void main(String args[]) throws IOException {
+        //Server serve = new  Server(PORT);
+        ServerSocket serverSocket = new ServerSocket(PORT);
         Socket clientSocket;
-        clientSocket = serverSocket.accept();
 
-        while(true) {
+        while (true) {
+            clientSocket = serverSocket.accept();
             System.out.println("New Client received :v" + clientSocket);
 
-            ObjectInputStream serverInput = new ObjectInputStream(clientSocket.getInputStream());
-            ObjectOutputStream serverOutput = new ObjectOutputStream(clientSocket.getOutputStream());
+            DataInputStream serverInput = new DataInputStream(clientSocket.getInputStream());
+            DataOutputStream serverOutput = new DataOutputStream(clientSocket.getOutputStream());
 
             System.out.println(" thread for client");
+            //serve.name = "Francis";
 
-            Connection handleMe = new Connection(clientSocket, "Thabo "+clientCounter, serverInput, serverOutput);
+            Connection handleMe = new Connection(clientSocket, "Thabo " + clientCounter, serverInput, serverOutput);
 
             Thread clientThread = new Thread(handleMe);
 
@@ -62,31 +42,27 @@ public class Server {
             clientCounter++;
         }
     }
+}
+
 
 
     class Connection implements Runnable{
         Socket clientSocket;
         int uniqueConnectiionID;
-        private ObjectOutputStream output;
-        private ObjectInputStream input;
+        final DataOutputStream connectOutput;
+        final DataInputStream connectInput;
         private String name;
-        volatile boolean isOnline;
-        public Connection(Socket clientSocket, String name, ObjectInputStream input, ObjectOutputStream output){
+        boolean isOnline;
+        public Connection(Socket clientSocket, String name, DataInputStream input, DataOutputStream output) {
             this.clientSocket = clientSocket;
-            this.input = input;
-            this.output = output;
+            this.connectInput = input;
+            this.connectOutput = output;
             this.name = name;
             this.isOnline=true;
         }
         public void run(){
             try{
-                //create input stream attached to socket
-                /*BufferedReader inFromClient = new BufferedReader(new InputStreamReader (clientSocket.getInputStream()));
-                //create output stream attached to socket
-                //Out to new client.
-                PrintWriter outToClient = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));*/
 
-                //read in line from the socket
                 String clientSentence;
                 /*while ((clientSentence = inFromClient.readLine()) != null || !inFromClient.equals("quit")) {
                     System.out.println("Client sent: "+clientSentence);
@@ -99,7 +75,7 @@ public class Server {
                 }*/
                 while(true){
                     try{
-                        clientSentence = input.readUTF();
+                        clientSentence = connectInput.readUTF();
                         System.out.println("clientSentence "+clientSentence);
 
                         if(clientSentence.equals("exit")){
@@ -109,14 +85,18 @@ public class Server {
                         }
 
                         //Messages and recepient
+                        String MsgToSend ="";
+                        String recipient ="";
                         StringTokenizer token = new StringTokenizer(clientSentence, ":");
-                        String MsgToSend = token.nextToken();
-                        String recipient = token.nextToken();
+                        while (token.hasMoreTokens()){
+                            MsgToSend = token.nextToken();
+                            recipient = token.nextToken();
+                        }
 
-                        for(Connection client: connectionsVector){
+                        for(Connection client: Server.connectionsVector){
                             if(client.name.equals(recipient) && client.isOnline){
-                                client.output.writeObject(this.name+" : "+MsgToSend);
-                                client.output.flush();
+                                client.connectOutput.writeUTF(this.name+" : "+MsgToSend);
+                                client.connectOutput.flush();
                                 break;
                             }
                         }
@@ -124,8 +104,8 @@ public class Server {
                     }catch (IOException ioe){ioe.printStackTrace();}
                 }
                 try{
-                    output.close();
-                    input.close();
+                    connectOutput.close();
+                    connectInput.close();
 
                 }catch (IOException ioe){ioe.printStackTrace();}
             } finally {
@@ -133,4 +113,3 @@ public class Server {
             }
         }
     }
-}
