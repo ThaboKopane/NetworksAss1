@@ -13,8 +13,18 @@ public class Client {
     HashMap<Integer, ClientDetails> otherCLients;
 
     Thread serverReceiver, clientReceiver;
+
+    Client(String _host, int _port) throws Exception{
+
+        clientSocket = new Socket(HOST, PORT);
+    }
+    Client() throws Exception{
+        clientSocket = new Socket(HOST, PORT);
+    }
+
     public static void main(String[] args) throws Exception{
         Client client = new Client(HOST, PORT);
+        //client.start();
 
         BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
         while(!bufR.equals("quit")){
@@ -25,14 +35,6 @@ public class Client {
         }
 
         client.close();
-    }
-
-    Client(String _host, int _port) throws Exception{
-
-        clientSocket = new Socket(HOST, PORT);
-    }
-    Client() throws Exception{
-        clientSocket = new Socket(HOST, PORT);
     }
 
     public void SendToServer(String msg, int idKey) throws Exception{
@@ -70,6 +72,14 @@ public class Client {
         clientSocket.close();
     }
 
+    public void start(){
+        serverReceiver = new Thread(new ServerReceiver());
+        serverReceiver.start();
+        clientReceiver = new Thread(new ClientReceiver());
+        clientReceiver.start();
+
+    }
+
 
 
 
@@ -87,14 +97,10 @@ public class Client {
             }
         }*/
 
-      class ServerReceiver implements Runnable {
-          public void run() {
+      class ServerReceiver implements Runnable{
+          public void run(){
               while (true) {
                   try {
-                     /* clientSocket = serverSocket.accept();
-                      InputStream in = clientSocket.getInputStream();
-                      int data = in.read();*/
-
                       BufferedReader inFromServer = new BufferedReader(new InputStreamReader (clientSocket.getInputStream()));
                       //read line from server
                       String res = inFromServer.readLine(); // if connection closes on server end, this throws java.net.SocketException
@@ -115,10 +121,14 @@ public class Client {
                     BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                     //read frim the other client
                     String reading = inFromClient.readLine();
+                    RecieveFromServer();
+
                 } catch (IOException io) {
                     io.printStackTrace();
                     continue;
 
+                } catch (Exception err){
+                    System.err.println("else doesn't compile");
                 }
 
             }
