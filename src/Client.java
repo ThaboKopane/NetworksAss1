@@ -1,22 +1,20 @@
 import java.io.*;
 import java.net.*;
-import java.util.HashMap;
-import java.util.TimerTask;
+import java.util.*;
 
 public class Client {
     //String name="";
     //FOR now call it a final
     public static final String HOST = "localhost";
     public static final int  PORT = 8888;
-    Socket clientSocket = null;
-    ServerSocket serverSocket = null;
-    HashMap<Integer, ClientDetails> otherCLients;
+    private Socket clientSocket = null;
+    private ServerSocket serverSocket = null;
+    private HashMap<String, ClientDetails> otherClients;
 
-    Thread serverReceiver, clientReceiver;
-
-    Client(String _host, int _port) throws Exception{
+    Client(String host, int _port) throws Exception{
 
         clientSocket = new Socket(HOST, PORT);
+        otherClients = new HashMap<String, ClientDetails>();
     }
     Client() throws Exception{
         clientSocket = new Socket(HOST, PORT);
@@ -27,7 +25,24 @@ public class Client {
         //client.start();
 
         BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("What is your name");
+        String name = bufR.readLine();
+        if(!client.otherClients.containsKey(name)){
+            client.otherClients.put(name, new ClientDetails(name, PORT));
+            System.out.println("User added");
+        } else { System.out.println("welcomeBack");}
+        System.out.println("user");
+        //Iterator<String> it = client.otherClients.
+        client.otherClients.put(name, new ClientDetails(name, PORT));
+        System.out.println(Arrays.asList(client.otherClients.toString()));
+
+
+
+
         while(!bufR.equals("quit")){
+
+            //System.out.println("user added");
+
             String reading = bufR.readLine();
             client.SendToServer(reading, 10);
             System.out.println("Server Said(1): "+client.RecieveFromServer());
@@ -44,23 +59,17 @@ public class Client {
         outToServer.print(msg + '\n');
         outToServer.flush();
     }
-    /*public void sendMessageToClient(ClientDetails user, String mes){
-        //Output stream attached to socket
+    public boolean send(String msg, ServerSocket serverSocket, int port){
         try{
-            ObjectOutputStream output = new ObjectOutputStream(clientSocket.getOutputStream());
-
-
+            ObjectOutputStream obj = new ObjectOutputStream(clientSocket.getOutputStream());
+            obj.writeObject(msg);
+            obj.flush();
         } catch (IOException ioe){
             ioe.printStackTrace();
+            return false;
         }
-
-    }*/
-    /*public void connectToClient(int idkey){
-        ClientDetails ud = otherCLients.get(idkey);
-        if(ud==null)
-            return;
-
-    }*/
+        return true;
+    }
     public String RecieveFromServer() throws Exception{
         //create input stream attached to socket
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader (clientSocket.getInputStream()));
@@ -72,13 +81,18 @@ public class Client {
         clientSocket.close();
     }
 
-    public void start(){
+
+    /*public void start(){
         serverReceiver = new Thread(new ServerReceiver());
+
         serverReceiver.start();
         clientReceiver = new Thread(new ClientReceiver());
         clientReceiver.start();
 
-    }
+
+
+
+    }*/
 
 
 
@@ -97,7 +111,9 @@ public class Client {
             }
         }*/
 
-      class ServerReceiver implements Runnable{
+
+
+      /*class ServerReceiver implements Runnable{
           public void run(){
               while (true) {
                   try {
@@ -140,7 +156,7 @@ public class Client {
           public void run(){
             //throughSocket("Stillbreathing"+" "+clientSocket.getLocalPort(), serverSocket, ipAddress, PORT);
         }
-      }
+      }*/
 }
 
 
