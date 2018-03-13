@@ -12,23 +12,34 @@ public class Server {
     //Vector for active clients
     static Vector<Connection> connectionsVector = new Vector<>();
     public static int clientCounter = 0;
-
+    private BufferedReader bufR;
+    private Client client;
+    private ClientDetails userDetails;
+    static HashMap<Integer, Client> otherClients;
     public static void main(String args[]) throws IOException {
-        //Server serve = new  Server(PORT);
+        Server serve = new  Server();
+        serve.bufR = new BufferedReader(new InputStreamReader(System.in));
         ServerSocket serverSocket = new ServerSocket(PORT);
         Socket clientSocket;
 
         while (true) {
             clientSocket = serverSocket.accept();
-            System.out.println("New Client received :v" + clientSocket);
+            System.out.println("New Client received : " + clientSocket);
 
-            DataInputStream serverInput = new DataInputStream(clientSocket.getInputStream());
-            DataOutputStream serverOutput = new DataOutputStream(clientSocket.getOutputStream());
+            //The following is wrong, doesn't do as intended
+            System.out.println("Enter your name");
+            String name = serve.bufR.readLine();
+            System.out.println("Enter your unique identifier");
+            int idKey = serve.bufR.read();
+
+
+            ObjectInputStream serverInput = new ObjectInputStream(clientSocket.getInputStream());
+            ObjectOutputStream serverOutput = new ObjectOutputStream(clientSocket.getOutputStream());
 
             System.out.println(" thread for client");
             //serve.name = "Francis";
 
-            Connection handleMe = new Connection(clientSocket, "Thabo " + clientCounter, serverInput, serverOutput);
+            Connection handleMe = new Connection(clientSocket, serverInput, serverOutput);
 
             Thread clientThread = new Thread(handleMe);
 
@@ -36,80 +47,16 @@ public class Server {
 
             //Add to the online people
             connectionsVector.add(handleMe);
+            for (Connection con : connectionsVector){
+                System.out.println(con);
+            }
 
             //Start
             clientThread.start();
-            clientCounter++;
         }
     }
 }
 
 
 
-    class Connection implements Runnable{
-        Socket clientSocket;
-        int uniqueConnectiionID;
-        final DataOutputStream connectOutput;
-        final DataInputStream connectInput;
-        private String name;
-        boolean isOnline;
-        public Connection(Socket clientSocket, String name, DataInputStream input, DataOutputStream output) {
-            this.clientSocket = clientSocket;
-            this.connectInput = input;
-            this.connectOutput = output;
-            this.name = name;
-            this.isOnline=true;
-        }
-        public void run(){
-            try{
 
-                String clientSentence;
-                /*while ((clientSentence = inFromClient.readLine()) != null || !inFromClient.equals("quit")) {
-                    System.out.println("Client sent: "+clientSentence);
-                    //process
-                    String last = clientSentence.substring(0,clientSentence.length()-1)+"2";
-                    String capitalizedSentence = last.toUpperCase() +'\n';
-                    //write out line to socket
-                    outToClient.print(capitalizedSentence);
-                    outToClient.flush();
-                }*/
-                while(true){
-                    try{
-                        clientSentence = connectInput.readUTF();
-                        System.out.println("clientSentence "+clientSentence);
-
-                        if(clientSentence.equals("exit")){
-                            this.isOnline = false;
-                            this.clientSocket.close();
-                            break;
-                        }
-
-                        //Messages and recepient
-                        String MsgToSend ="";
-                        String recipient ="";
-                        StringTokenizer token = new StringTokenizer(clientSentence, ":");
-                        while (token.hasMoreTokens()){
-                            MsgToSend = token.nextToken();
-                            recipient = token.nextToken();
-                        }
-
-                        for(Connection client: Server.connectionsVector){
-                            if(client.name.equals(recipient) && client.isOnline){
-                                client.connectOutput.writeUTF(this.name+" : "+MsgToSend);
-                                client.connectOutput.flush();
-                                break;
-                            }
-                        }
-
-                    }catch (IOException ioe){ioe.printStackTrace();}
-                }
-                try{
-                    connectOutput.close();
-                    connectInput.close();
-
-                }catch (IOException ioe){ioe.printStackTrace();}
-            } finally {
-                //System.out.println("whatever use you have");
-            }
-        }
-    }

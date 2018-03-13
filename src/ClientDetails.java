@@ -6,10 +6,9 @@ public class ClientDetails {
     private int port;
     private InetAddress ipAddress;
 
-    public ClientDetails(String name, int port){
+    public ClientDetails(String name, int idKey){
         this.name = name;
         this.idkey=idkey;
-        this.port = port;
         //ipAddress = ip;
     }
 

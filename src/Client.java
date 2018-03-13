@@ -8,36 +8,69 @@ public class Client {
     public static final String HOST = "localhost";
     public static final int  PORT = 8888;
 
-    private HashMap<String, ClientDetails> otherClients;
+    static HashMap<Integer, Client> otherClients;
+    static ClientDetails userDetails;
+    static Socket clientSocket = null;
 
-    /*Client(String host, int _port) throws Exception{
+    Client(ClientDetails userDetails){
+        this.userDetails = userDetails;
 
-        clientSocket = new Socket(HOST, PORT);
-        otherClients = new HashMap<String, ClientDetails>();
     }
-    Client() throws Exception{
-        clientSocket = new Socket(HOST, PORT);
+
+    /*public void SendToServer(String msg) throws Exception{
+        //create output stream attached to socket
+        PrintWriter outToServer = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+        //send msg to server
+        outToServer.print(msg + '\n');
+        outToServer.flush();
     }*/
+
 
     public static void main(String[] args) throws UnknownHostException, IOException{
 
-
         BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
+
         //local ip
         InetAddress ip = InetAddress.getByName(HOST);
 
         Socket clientSocket = new Socket(ip, PORT);
+        int idKey=0;
+        if(args.length==0){
+            System.out.println("Enter your idKey");
+            idKey = Integer.parseInt(bufR.readLine());
+        }
+        String name;
+        do{
+            System.out.println("enter your name");
+            name = bufR.readLine();
+            try{
+                userDetails = new ClientDetails(name, idKey);
+                Client client = new Client(userDetails);
+                if(userDetails!=null || userDetails.getIdkey() != 0)
+                    break;
+            }catch (Exception ioe){ioe.printStackTrace();}
+        }while(true);
+
+        while(clientSocket.isBound()){
+            System.out.println("Enter you message");
+            String message = bufR.readLine();
+
+        }
+
+
 
         //Input and output
         DataInputStream input = new DataInputStream(clientSocket.getInputStream());
         DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
 
-        //New Threads
+
+
         Thread sendMessage = new Thread(new Runnable() {
             @Override
             public void run() {
                 while(true){
                     //read the message to delive
+                    System.out.println("Okay, try sending a message");
                     try{
                         String msg = bufR.readLine();
                         output.writeUTF(msg);
@@ -47,9 +80,11 @@ public class Client {
             }
         });
 
+
         Thread readMessage = new Thread(new Runnable() {
             @Override
             public void run() {
+                System.out.println("Incoming");
                 while(true){
                     try{
                         String msg = input.readUTF();
@@ -58,34 +93,11 @@ public class Client {
                 }
             }
         });
+        //if()
         sendMessage.start();
         readMessage.start();
 
-        /*System.out.println("What is your name");
-        String name = bufR.readLine();
-        if(!client.otherClients.containsKey(name)){
-            client.otherClients.put(name, new ClientDetails(name, PORT));
-            System.out.println("User added");
-        } else { System.out.println("welcomeBack");}
-        System.out.println("user");
-        //Iterator<String> it = client.otherClients.
-        client.otherClients.put(name, new ClientDetails(name, PORT));
-        System.out.println(Arrays.asList(client.otherClients.toString()));
 
-
-
-
-        while(!bufR.equals("quit")){
-
-            //System.out.println("user added");
-
-            String reading = bufR.readLine();
-            client.SendToServer(reading, 10);
-            System.out.println("Server Said(1): "+client.RecieveFromServer());
-
-        }
-
-        client.close();*/
     }
 
     /*public void SendToServer(String msg, int idKey) throws Exception{
