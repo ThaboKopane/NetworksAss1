@@ -55,10 +55,6 @@ public class Server {
             //Add to the online people
             connectionsVector.add(handleMe);
 
-            for(ClientThread thread : connectionsVector){
-                System.out.println(thread.);
-            }
-
             //Start
             clientThread.start();
             clientCounter++;

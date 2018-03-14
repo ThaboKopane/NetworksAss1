@@ -26,14 +26,6 @@ public class Client {
         client.close();
     }
 
-    Client(String _host, int _port) throws Exception{
-        host = _host;
-        port = _port;
-        socket = new Socket(host, port);
-    }
-    Client() throws Exception{
-        socket = new Socket(host, port);
-    }
     void SendToServer(String msg) throws Exception{
         //create output stream attached to socket
         PrintWriter outToServer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
