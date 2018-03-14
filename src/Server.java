@@ -12,6 +12,7 @@ public class Server {
     //Vector for active clients
     static Vector<ClientThread> connectionsVector = new Vector<>();
     public static int clientCounter = 0;
+    static ClientDetails userDetails;
 
     public static void main(String args[]) throws IOException {
         //Server serve = new  Server(PORT);
@@ -22,8 +23,12 @@ public class Server {
             clientSocket = serverSocket.accept();
             System.out.println("New Client received :v" + clientSocket);
 
-            DataInputStream serverInput = new DataInputStream(clientSocket.getInputStream());
-            DataOutputStream serverOutput = new DataOutputStream(clientSocket.getOutputStream());
+            ObjectInputStream serverInput = new ObjectInputStream(clientSocket.getInputStream());
+            PrintWriter serverOutput = new PrintWriter(clientSocket.getOutputStream());
+
+            while(userDetails != null){
+
+            }
 
             System.out.println(" thread for client");
             //serve.name = "Francis";
