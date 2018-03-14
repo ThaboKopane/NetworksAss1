@@ -6,17 +6,18 @@ class ClientThread implements Runnable{
     Socket clientSocket;
     int uniqueConnectiionID;
     BufferedReader bufR;
-    private String name;
+    private ClientDetails userDetails;
     boolean isOnline;
-    final PrintStream connectOutput = null;
-    final ObjectInputStream connectInput = null;
-    /*public ClientThread(Socket clientSocket, String name, DataInputStream input, DataOutputStream output) {
+    final PrintWriter connectOutput;
+    final BufferedReader connectInput;
+
+    public ClientThread(Socket clientSocket, ClientDetails userD, BufferedReader input, PrintWriter output) {
         this.clientSocket = clientSocket;
         this.connectInput = input;
         this.connectOutput = output;
-        this.name = name;
+        this.userDetails = userD;
         this.isOnline=true;
-    }*/
+    }
     public void run(){
         try{
             bufR = new BufferedReader(new InputStreamReader(System.in));
@@ -25,14 +26,6 @@ class ClientThread implements Runnable{
 
             while(true){
                 try{
-                    clientSentence = connectInput.readUTF();
-                    System.out.println("clientSentence "+clientSentence);
-                    System.out.println("WHAT IS YOUR name");
-                    name = bufR.readLine();
-                    System.out.println("your unique identifier");
-                    uniqueConnectiionID = Integer.parseInt(bufR.readLine());
-
-                    ClientDetails userD = new ClientDetails(name, uniqueConnectiionID);
 
                     clientSentence = bufR.readLine();
                     if(clientSentence.equals("exit")){

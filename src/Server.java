@@ -18,31 +18,46 @@ public class Server {
         //Server serve = new  Server(PORT);
         ServerSocket serverSocket = new ServerSocket(PORT);
         Socket clientSocket;
+        String clientInput;
 
         while (true) {
             clientSocket = serverSocket.accept();
             System.out.println("New Client received :v" + clientSocket);
 
-            ObjectInputStream serverInput = new ObjectInputStream(clientSocket.getInputStream());
+            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter serverOutput = new PrintWriter(clientSocket.getOutputStream());
 
-            while(userDetails != null){
+
+            String name ="";
+            int userID =0;
+
+            while(userDetails !=null && (clientInput = inFromClient.readLine()) != null && !inFromClient.equals("quit")){
+                serverOutput.print("What is your name");
+                serverOutput.flush();
+                name = inFromClient.readLine();
+                serverOutput.print("your unique ID");
+                serverOutput.flush();
+                userID = Integer.parseInt(inFromClient.readLine());
+                userDetails = new ClientDetails(name, userID);
 
             }
+
 
             System.out.println(" thread for client");
             //serve.name = "Francis";
 
-            ClientThread handleMe = new ClientThread();
+            ClientThread handleMe = new ClientThread(clientSocket, userDetails, inFromClient, serverOutput);
 
-            Thread clientThread = new Thread(new ClientThread());
+            Thread clientThread = new Thread(handleMe);
 
             System.out.println("Adding to active client list");
 
             //Add to the online people
             connectionsVector.add(handleMe);
 
-            System.out.println(connectionsVector.iterator());
+            for(ClientThread thread : connectionsVector){
+                System.out.println(thread.);
+            }
 
             //Start
             clientThread.start();
