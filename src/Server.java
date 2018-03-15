@@ -9,55 +9,57 @@ public class Server {
     public static final int PORT = 8888;
 
 
+
     //Vector for active clients
     static Vector<ClientThread> connectionsVector = new Vector<>();
     public static int clientCounter = 0;
-    static ClientDetails userDetails;
+    private static ClientThread[] threads = new ClientThread[15];
+    private static Socket clientSocket = null;
+    private static ServerSocket serverSocket = null;
 
     public static void main(String args[]) throws IOException {
         //Server serve = new  Server(PORT);
         ServerSocket serverSocket = new ServerSocket(PORT);
-        Socket clientSocket;
-        String clientInput;
+
+
+        /*String clientInput;
+        String name ="";
+        serverOutput.writeUTF("Enter your name");
+        serverOutput.flush();
+        name = inFromClient.readUTF().trim();*/
+
 
         while (true) {
-            clientSocket = serverSocket.accept();
-            System.out.println("New Client received :v" + clientSocket);
+            try{
+                clientSocket = serverSocket.accept();
+                System.out.println("New Client received : " + clientSocket);
 
-            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            PrintWriter serverOutput = new PrintWriter(clientSocket.getOutputStream());
+                ClientThread connection = new ClientThread(clientSocket, threads);
+                connectionsVector.add(connection);
+                connection.run();
+                break;
 
-
-            String name ="";
-            int userID =0;
-
-            while(userDetails !=null && (clientInput = inFromClient.readLine()) != null && !inFromClient.equals("quit")){
-                serverOutput.print("What is your name");
-                serverOutput.flush();
-                name = inFromClient.readLine();
-                serverOutput.print("your unique ID");
-                serverOutput.flush();
-                userID = Integer.parseInt(inFromClient.readLine());
-                userDetails = new ClientDetails(name, userID);
-
-            }
+            } catch (Exception eror){eror.printStackTrace();}
 
 
-            System.out.println(" thread for client");
+            /*//System.out.println(" thread for client");
+            serverOutput.writeUTF("creating a thread for you");
+            serverOutput.flush();
             //serve.name = "Francis";
 
-            ClientThread handleMe = new ClientThread(clientSocket, userDetails, inFromClient, serverOutput);
+            ClientThread handleMe = new ClientThread(clientSocket, userDetails);
 
             Thread clientThread = new Thread(handleMe);
 
-            System.out.println("Adding to active client list");
+            serverOutput.writeUTF("Adding you to client list");
+            serverOutput.flush();
 
             //Add to the online people
             connectionsVector.add(handleMe);
 
             //Start
             clientThread.start();
-            clientCounter++;
+            clientCounter++;*/
 
         }
     }

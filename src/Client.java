@@ -2,28 +2,60 @@ import java.io.*;
 import java.net.*;
 import java.util.Vector;
 
-public class Client {
-    //String name="";
-    String host = "localhost";
+public class Client implements Runnable{
+
+
     static Vector<ClientThread> connectionsVector = new Vector<>();
-    int port = 8888;
+    private static BufferedReader bufR =  null;
+    private static ObjectOutputStream output = null;
+    private static ObjectInputStream input = null;
+    private static Socket clientSocket = null;
+    private static boolean closed = false;
+
+
+    public static final int PORT = 8888;
     Socket socket = null;
     public static void main(String[] args) throws Exception{
+        String host = "localhost";
         Client client = new Client();
 
-        BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
-        while(!bufR.equals("quit")){
 
-            String reading = bufR.readLine();
-            client.SendToServer(reading);
-            System.out.println("Server Said(1): "+client.RecieveFromServer());
+        try{
+            System.out.println("input starts here");
+            clientSocket = new Socket(host, PORT);
+            bufR = new BufferedReader(new InputStreamReader(System.in));
+            output = new ObjectOutputStream(clientSocket.getOutputStream());
+            input = new ObjectInputStream(clientSocket.getInputStream());
 
+            System.out.println(input.readUTF());
+
+        } catch (UnknownHostException un){System.err.println("host unknown");}
+
+        if(clientSocket !=null && output !=null && input !=null){
+            (new Thread(new Client())).start();
+            while(!closed){
+                output.writeUTF(bufR.readLine().trim());
+                output.flush();
+            }
+            output.close();
+            input.close();
+            clientSocket.close();
         }
-        /*client.SendToServer("Hey dude 1");
-        System.out.println("Server Said(1): "+client.RecieveFromServer());
-        client.SendToServer("Hey dude 2");
-        System.out.println("Server Said(2): "+client.RecieveFromServer());*/
-        client.close();
+
+    }
+
+    public void run() {
+        String responseLine;
+        try {
+            while ((responseLine = input.readUTF()) != null) {
+                System.out.println(responseLine);
+                if (responseLine.indexOf("quit") != -1)
+                    break;
+            }
+            closed = true;
+        } catch (IOException ioerr) {
+            System.out.println("IOE: " + ioerr);
+        }
     }
 
     void SendToServer(String msg) throws Exception{

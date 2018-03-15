@@ -5,7 +5,7 @@ public class ClientDetails {
     private int port;
     private InetAddress ipAddress;
 
-    public ClientDetails(String name, int port){
+    public ClientDetails(String name){
         this.name = name;
         this.port = port;
         //ipAddress = ip;
