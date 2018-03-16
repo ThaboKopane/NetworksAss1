@@ -12,23 +12,22 @@ class ClientThread implements Runnable{
     For one of the examples I saw online CLientThread[] was keeping a max on the number of clients that could be
     online at a time.
      */
-    private final ClientThread[] threads;
     boolean isOnline;
     private ObjectOutputStream connectOutput;
     private ObjectInputStream connectInput;
     private int maxClient;
-    String clientName;
+    private String name;
+    private ClientDetails userDetails;
 
-    public ClientThread(Socket clientSocket, ClientThread[] threads) {
+    public ClientThread(Socket clientSocket) {
         this.clientSocket = clientSocket;
-        this.threads = threads;
         this.isOnline=true;
-        this.maxClient = threads.length;
+        this.name = name;
+        this.userDetails = userDetails;
     }
+
     public void run(){
         //total of clients connecyed at a time
-        int maxClientsCount = this.maxClient;
-        ClientThread[] threads = this.threads;
         try {
 
             //When the server says clientThread start, it comes here.
@@ -43,6 +42,7 @@ class ClientThread implements Runnable{
             //That is not happening yet
             while (true) {
                 connectOutput.writeUTF("Enter your name");
+                connectOutput.flush();
                 name = connectInput.readUTF().trim();
                 //It's breaking to go to the next loop where we askth e user conversational questions
                 //The reason we don't want at in your name, is to be able direct a message to one person
@@ -53,38 +53,22 @@ class ClientThread implements Runnable{
 
             }
             connectOutput.writeUTF("Welcome "+name+" to the chat");
+            connectOutput.flush();
 
-            /*synchronized(this){
-            for (int n = 0; n < maxClientsCount; n++) {
-                if (threads[n] != null && threads[n] == this) {
-                    clientName = "@" + name;
-                    break;
-                }
-            }
-            for (int n = 0; n < maxClientsCount; n++) {
-                if (threads[n] != null && threads[n] != this) {
-                    threads[n].connectOutput.writeUTF("A client is online " + name);
-                }
-            }
-        }*/
             while(true) {
 
                 try{
-
                     clientSentence = connectInput.readUTF();
-                    if(clientSentence.equals("exit")){
-                        this.isOnline = false;
-                        break;
-                    }
+                    System.out.println("got this from server "+clientSentence);
+                    connectOutput.writeUTF(clientSentence+ " coming back from the server");
+                    connectOutput.flush();
+                    System.out.println("waiting for the nextLine...");
 
 
                 }catch (IOException ioe){ioe.printStackTrace();}
             }
 
 
-            connectInput.close();
-            connectOutput.close();
-            clientSocket.close();
         }catch (Exception ioe){ioe.printStackTrace();}
     }
 }
