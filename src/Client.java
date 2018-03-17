@@ -9,7 +9,7 @@ public class Client{
 	ObjectInputStream in;
 	String str;
 	private String FILE_TO_RECEIVED;
-	private String STORED_FILE; 
+	private String STORED_FILE;
 	public static void main(String[] args) {
 		IDENTIFY_NUMBER = args[0];
 		CONNECT_PORT = Integer.valueOf(args[1]);
@@ -25,7 +25,7 @@ public class Client{
 			//get Input from standard input
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 			System.out.println("Please enter command as a string ");
-			Server ser = new Server();
+			ServerThread ser = new ServerThread();
 			new Thread(ser).start();
 			while(true){
 				str = bufferedReader.readLine();//read a sentence from the standard input
@@ -36,7 +36,7 @@ public class Client{
 		}
 		catch (ConnectException e) {
     			System.err.println("Connection refused. You need to initiate a server first.");
-		} 
+		}
 		catch(UnknownHostException unknownHost){
 			System.err.println("You are trying to connect to an unknown host!");
 		}
@@ -54,7 +54,7 @@ public class Client{
 			}
 		}
 	}
-	private class Server implements Runnable {
+	private class ServerThread implements Runnable {
 		private boolean bconnected = false;
 		public void run() { //receive message from server;
 			try {
@@ -62,20 +62,21 @@ public class Client{
 				bconnected = true;
 				while (bconnected) {
 					String inStr = (String)in.readObject();
+					//String inStrin = in.readUTF();
 					if(!inStr.equals("file")) {
 						System.out.println(inStr);
 					}else {
 						String senderNumber=(String)in.readObject();
 						STORED_FILE = (String)in.readObject();
 						//create file to received path;
-						FILE_TO_RECEIVED = IDENTIFY_NUMBER + "/" + STORED_FILE;	
+						FILE_TO_RECEIVED = IDENTIFY_NUMBER + "/" + STORED_FILE;
 				        byte[] contents = new byte[10000];
 				        //Initialize the FileOutputStream to the output file's full path.
 				        FileOutputStream fos = new FileOutputStream(FILE_TO_RECEIVED);
-				        BufferedOutputStream bos = new BufferedOutputStream(fos); 
+				        BufferedOutputStream bos = new BufferedOutputStream(fos);
 				        InputStream is = socket.getInputStream();
 				        String inLengthStr = (String)in.readObject();
-				        int fileLength= Integer.valueOf(inLengthStr); 
+				        int fileLength= Integer.valueOf(inLengthStr);
 				        int bytesRead = 0;
 				        int[] total=new int[1];
 				       while((bytesRead=is.read(contents))!=-1){
@@ -85,9 +86,9 @@ public class Client{
 				    	    	 break;
 				    	     }
 				        }
-				       bos.flush(); 
+				       bos.flush();
 				       System.out.println("File: "+STORED_FILE+" was sent by client"+senderNumber);
-					}		        
+					}
 				}
 			} catch (SocketException e1) {
 				System.out.println("Bye!");
@@ -96,7 +97,7 @@ public class Client{
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
- 
+
 		}
 	}
 	//send a message to the output stream
