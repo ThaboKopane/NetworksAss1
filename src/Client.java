@@ -13,10 +13,11 @@ public class Client{
 	public static void main(String[] args) {
 		IDENTIFY_NUMBER = args[0];
 		CONNECT_PORT = Integer.valueOf(args[1]);
-		mkDir(IDENTIFY_NUMBER);
-		new Client().start();
+		//mkDir(IDENTIFY_NUMBER);
+		new Client().start(CONNECT_PORT);
 	}
-	void start() {
+	void start(int port) {
+	    port = CONNECT_PORT;
 		try{
 			socket = new Socket("localhost",CONNECT_PORT);
 			//initialize inputStream and outputStream

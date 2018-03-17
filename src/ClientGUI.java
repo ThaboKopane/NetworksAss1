@@ -20,11 +20,9 @@ public class ClientGUI extends JFrame implements ActionListener{
     JTextField cnPort;
     JLabel clientNum;
     JTextArea response;
-    Server server;
-    ServerGUI serverGUI;
     public ClientGUI(){
         this.setTitle("Hello friend");
-        this.setSize(500, 500);
+        this.setSize(320, 240);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane();
 
@@ -69,7 +67,6 @@ public class ClientGUI extends JFrame implements ActionListener{
 
         response = new JTextArea();
         response.setBounds(10, 85, 290, 120);
-        //response.setBackground(Color.red);
         add(response);
 
 
@@ -78,24 +75,12 @@ public class ClientGUI extends JFrame implements ActionListener{
     }
     @Override
     public void actionPerformed(ActionEvent ae){
-        Object oe = ae.getSource();
-        if(oe == startServer){
-            int port = Integer.parseInt(serverPortInput.getText());
-            server = new Server();
-
-            server.start(port);
+        if(ae.getSource().equals(clientStart)){
+            try {
+                Client client = new Client();
+                client.start(Integer.parseInt(cnPort.getText()));
+            }catch (Exception ioe){ioe.printStackTrace();}
         }
-    }
-    public void append(String str){
-        response.append(str);
-        response.setCaretPosition(response.getText().length() - 1);
-    }
-    public void startServerClicked() throws IOException {
-        //ObjectOutputStream p = new ObjectOutputStream()
-
-
-
-        response.setText("the server might have started");
     }
     public static void main(String[] args){
         new ClientGUI();
