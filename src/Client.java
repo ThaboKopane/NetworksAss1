@@ -14,9 +14,9 @@ public class Client{
 		IDENTIFY_NUMBER = args[0];
 		CONNECT_PORT = Integer.valueOf(args[1]);
 		mkDir(IDENTIFY_NUMBER);
-		new Client().begin();
+		new Client().start();
 	}
-	void begin() {
+	void start() {
 		try{
 			socket = new Socket("localhost",CONNECT_PORT);
 			//initialize inputStream and outputStream

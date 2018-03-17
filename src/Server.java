@@ -17,12 +17,12 @@ public class Server {
         try {
             PORT_NUMBER = Integer.parseInt(bufR.readLine());
         }catch (IOException ioe){ioe.printStackTrace();}
-        new Server().begin();
+        new Server().start(PORT_NUMBER);
     }
 
-    public void begin() {
+    public void start(int port) {
         try {
-            listener = new ServerSocket(PORT_NUMBER);
+            listener = new ServerSocket(port);
             started = true;
         } catch (BindException e1) {
             System.out.println("Port is in use.");
