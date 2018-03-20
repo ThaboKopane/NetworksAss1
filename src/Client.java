@@ -10,6 +10,7 @@ public class Client{
 	String str;
 	private String FILE_TO_RECEIVED;
 	private String STORED_FILE;
+	InetAddress address;
 	public static void main(String[] args) {
 		IDENTIFY_NUMBER = args[0];
 		CONNECT_PORT = Integer.valueOf(args[1]);
@@ -18,8 +19,12 @@ public class Client{
 	}
 	void start(int port) {
 	    port = CONNECT_PORT;
+	    String host = "localhost";
+
 		try{
-			socket = new Socket("localhost",CONNECT_PORT);
+			address = InetAddress.getByName(host);
+			System.out.println(address);
+			socket = new Socket(address,CONNECT_PORT);
 			//initialize inputStream and outputStream
 			out = new ObjectOutputStream(socket.getOutputStream());
 			out.flush();
