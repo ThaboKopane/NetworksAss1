@@ -9,11 +9,12 @@ public class Server {
     boolean started = false;
     ServerSocket listener;
     int clientNum = 1;
+    String[] clients;
     List<ClientThread> list = new ArrayList<ClientThread>();
 
     public static void main(String[] args) {
         BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
-        //PORT_NUMBER = Integer.valueOf(args[0]);
+        PORT_NUMBER = Integer.valueOf(args[0]);
         try {
             PORT_NUMBER = Integer.parseInt(bufR.readLine());
         }catch (IOException ioe){ioe.printStackTrace();}
@@ -57,6 +58,7 @@ public class Server {
         private boolean bconnected;
         private int number = clientNum;
         String str;
+        private String name;
 
         public ClientThread(Socket socket) {
             this.socket = socket;
@@ -126,7 +128,7 @@ public class Server {
                                     continue;
                                 }
                                 ClientThread c = list.get(i);
-                                c.send("@client" + number + ":" + message);
+                                c.send("@client"+ number + ":" + message);
                             }
                         }
                         if (MOF.equals("file")) {

@@ -10,10 +10,14 @@ public class Client{
 	String str;
 	private String FILE_TO_RECEIVED;
 	private String STORED_FILE;
-	InetAddress address;
+	static InetAddress address;
 	public static void main(String[] args) {
 		IDENTIFY_NUMBER = args[0];
 		CONNECT_PORT = Integer.valueOf(args[1]);
+		try {
+			address = InetAddress.getByName(args[2]);
+		} catch (UnknownHostException unk){System.err.println("Host is unknown fam");}
+
 		//mkDir(IDENTIFY_NUMBER);
 		new Client().start(CONNECT_PORT);
 	}
@@ -22,8 +26,7 @@ public class Client{
 	    String host = "localhost";
 
 		try{
-			address = InetAddress.getByName(host);
-			System.out.println(address);
+			//address = InetAddress.getByName(host);
 			socket = new Socket(address,CONNECT_PORT);
 			//initialize inputStream and outputStream
 			out = new ObjectOutputStream(socket.getOutputStream());
