@@ -12,11 +12,20 @@ public class Client{
 	private String STORED_FILE;
 	static InetAddress address;
 	public static void main(String[] args) {
-		folder_Name = args[0];
-		CONNECT_PORT = Integer.valueOf(args[1]);
+	    BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
+		//folder_Name = args[0];
+		//CONNECT_PORT = Integer.valueOf(args[1]);
+
 		try {
-			address = InetAddress.getByName(args[2]);
+		    System.out.println("Enter [name of folder] [port number] [ip address]");
+		    String[] stuff = bufR.readLine().split(" ");
+			//address = InetAddress.getByName(args[2]);
+            folder_Name = stuff[0];
+            CONNECT_PORT = Integer.valueOf(stuff[1]);
+            address = InetAddress.getByName(stuff[2]);
+
 		} catch (UnknownHostException unk){System.err.println("Host is unknown fam");}
+		catch (IOException ioe){ioe.printStackTrace();}
 
 		mkDir(folder_Name);
 		new Client().start(CONNECT_PORT);

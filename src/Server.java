@@ -15,8 +15,10 @@ public class Server {
     HashMap<Integer, String> clients = new HashMap<>();
 
     public static void main(String[] args) {
+        //System.out.println("enter port you wish to binf to");
         BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
         //PORT_NUMBER = Integer.valueOf(args[0]);
+        System.out.println("waiting for clients");
         try {
             PORT_NUMBER = Integer.parseInt(bufR.readLine());
         }catch (IOException ioe){ioe.printStackTrace();}
