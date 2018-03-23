@@ -18,7 +18,7 @@ public class Client{
 			address = InetAddress.getByName(args[2]);
 		} catch (UnknownHostException unk){System.err.println("Host is unknown fam");}
 
-		//mkDir(IDENTIFY_NUMBER);
+		mkDir(IDENTIFY_NUMBER);
 		new Client().start(CONNECT_PORT);
 	}
 	void start(int port) {
@@ -69,6 +69,9 @@ public class Client{
 			try {
 				in = new ObjectInputStream(socket.getInputStream());
 				bconnected = true;
+
+
+
 				while (bconnected) {
 					String inStr = (String)in.readObject();
 					//String inStrin = in.readUTF();
@@ -88,6 +91,8 @@ public class Client{
 				        int fileLength= Integer.valueOf(inLengthStr);
 				        int bytesRead = 0;
 				        int[] total=new int[1];
+
+
 				       while((bytesRead=is.read(contents))!=-1){
 				    	     total[0]= total[0]+bytesRead;
 				    	     bos.write(contents, 0, bytesRead);
