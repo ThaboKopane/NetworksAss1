@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Server {
@@ -9,8 +10,9 @@ public class Server {
     boolean started = false;
     ServerSocket listener;
     int clientNum = 1;
-    String[] clients;
+    String clientName;
     List<ClientThread> list = new ArrayList<ClientThread>();
+    HashMap<Integer, String> clients = new HashMap<>();
 
     public static void main(String[] args) {
         BufferedReader bufR = new BufferedReader(new InputStreamReader(System.in));
@@ -20,6 +22,7 @@ public class Server {
         }catch (IOException ioe){ioe.printStackTrace();}
         new Server().start(PORT_NUMBER);
     }
+
 
     public void start(int port) {
         try {
@@ -31,6 +34,8 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
         //synchronized (this) {
             try {
                 while (started) {
@@ -39,6 +44,8 @@ public class Server {
                     new Thread(c).start();
                     list.add(c);
                     System.out.println("Client client" + clientNum + " connected");
+
+                    clients.put(clientNum, "Thabo");
                     clientNum++;
                 }
             } catch (IOException e) {
@@ -58,8 +65,9 @@ public class Server {
         private ObjectOutputStream out;
         private boolean bconnected;
         private int number = clientNum;
+        private HashMap<Integer, String> clientList = clients;
+        private String name = clientName;
         String str;
-        private String name;
 
         public ClientThread(Socket socket) {
             this.socket = socket;
@@ -84,25 +92,28 @@ public class Server {
                 FileInputStream fis = new FileInputStream(file);
                 BufferedInputStream bis = new BufferedInputStream(fis);
                 OutputStream os = socket.getOutputStream();
+
                 byte[] contents;
                 long fileLength = file.length();
                 String fileClientString = Long.toString(fileLength);
                 send(fileClientString);
                 long current = 0;
 
-                while (current != fileLength) {
-                    int size = 10000;
-                    if (fileLength - current >= size)
-                        current += size;
-                    else {
-                        size = (int) (fileLength - current);
-                        current = fileLength;
+                synchronized (this) {
+                    while (current != fileLength) {
+                        int size = 10000;
+                        if (fileLength - current >= size)
+                            current += size;
+                        else {
+                            size = (int) (fileLength - current);
+                            current = fileLength;
+                        }
+                        contents = new byte[size];
+                        bis.read(contents, 0, size);
+                        os.write(contents);
                     }
-                    contents = new byte[size];
-                    bis.read(contents, 0, size);
-                    os.write(contents);
+                    os.flush();
                 }
-                os.flush();
             } catch (IOException e) {
                 list.remove(this);
                 System.out.println("I/O exception");
@@ -114,7 +125,12 @@ public class Server {
             try {
                 in = new ObjectInputStream(socket.getInputStream());
                 out = new ObjectOutputStream(socket.getOutputStream());
+                //Try prompting name
+                out.writeObject("What is your name: ");
                 out.flush();
+                //read in the name
+                clientName = (String)in.readObject();
+
                 bconnected = true;
                     while (bconnected) {
                         str = (String) in.readObject();
@@ -133,7 +149,8 @@ public class Server {
                                             continue;
                                         }
                                         ClientThread c = list.get(i);
-                                        c.send("@client" + number + ":" + message);
+                                        clientList.get(i);
+                                        c.send("@client "+number + ":" + message);
                                     }
                                 }
                             }
@@ -150,8 +167,10 @@ public class Server {
                                         c.sendFile(FILE_PATH);    //send file
                                     }
                             }
+
+
                             System.out.println("client" + number + " " + method + " " + MOF);
-                        } else if (method.equals("unicast")) {  //unicast method
+                        } else if (method.equals("private")) {  //private method
                             int target = 0;
                             if (MOF.equals("message")) {
                                 String client = temp[temp.length - 1];
