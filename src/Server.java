@@ -31,7 +31,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        synchronized (this) {
+        //synchronized (this) {
             try {
                 while (started) {
                     Socket socket = listener.accept();
@@ -50,7 +50,6 @@ public class Server {
                     e.printStackTrace();
                 }
             }
-        }
     }
 
     class ClientThread implements Runnable {
@@ -90,6 +89,7 @@ public class Server {
                 String fileClientString = Long.toString(fileLength);
                 send(fileClientString);
                 long current = 0;
+
                 while (current != fileLength) {
                     int size = 10000;
                     if (fileLength - current >= size)
@@ -116,7 +116,6 @@ public class Server {
                 out = new ObjectOutputStream(socket.getOutputStream());
                 out.flush();
                 bconnected = true;
-                synchronized (this) {
                     while (bconnected) {
                         str = (String) in.readObject();
                         String[] temp = str.split("\\s+");
@@ -128,25 +127,28 @@ public class Server {
                         String message = content(str);// extract t from str
                         if (method.equals("broadcast")) {  //broadcast method
                             if (MOF.equals("message")) {
-                                for (int i = 0; i < list.size(); i++) {
-                                    if (i == number - 1) {
-                                        continue;
+                                synchronized (this) {
+                                    for (int i = 0; i < list.size(); i++) {
+                                        if (i == number - 1) {
+                                            continue;
+                                        }
+                                        ClientThread c = list.get(i);
+                                        c.send("@client" + number + ":" + message);
                                     }
-                                    ClientThread c = list.get(i);
-                                    c.send("@client" + number + ":" + message);
                                 }
                             }
                             if (MOF.equals("file")) {
-                                for (int i = 0; i < list.size(); i++) {
-                                    if (i == number - 1) {
-                                        continue;
+                                //synchronized (this) {
+                                    for (int i = 0; i < list.size(); i++) {
+                                        if (i == number - 1) {
+                                            continue;
+                                        }
+                                        ClientThread c = list.get(i);
+                                        c.send("file");
+                                        c.send(Integer.toString(number));    //send file's size
+                                        c.send(extractFileName(temp[2]));    // send file name
+                                        c.sendFile(FILE_PATH);    //send file
                                     }
-                                    ClientThread c = list.get(i);
-                                    c.send("file");
-                                    c.send(Integer.toString(number));    //send file's size
-                                    c.send(extractFileName(temp[2]));    // send file name
-                                    c.sendFile(FILE_PATH);    //send file
-                                }
                             }
                             System.out.println("client" + number + " " + method + " " + MOF);
                         } else if (method.equals("unicast")) {  //unicast method
@@ -154,25 +156,29 @@ public class Server {
                             if (MOF.equals("message")) {
                                 String client = temp[temp.length - 1];
                                 target = getTarget(client);
-                                for (int i = 0; i < list.size(); i++) {
-                                    if (i == target) {
-                                        ClientThread c = list.get(i);
-                                        c.send("@client" + number + ":" + message);
+                                synchronized (this) {
+                                    for (int i = 0; i < list.size(); i++) {
+                                        if (i == target) {
+                                            ClientThread c = list.get(i);
+                                            c.send("@client" + number + ":" + message);
+                                        }
                                     }
                                 }
                             }
                             if (MOF.equals("file")) {
                                 String client = temp[temp.length - 1];
                                 target = getTarget(client);
-                                for (int i = 0; i < list.size(); i++) {
-                                    if (target == i) {
-                                        ClientThread c = list.get(i);
-                                        c.send("file");
-                                        c.send(Integer.toString(number));
-                                        c.send(extractFileName(temp[2]));
-                                        c.sendFile(FILE_PATH);
-                                    }
+                                synchronized (this) {
+                                    for (int i = 0; i < list.size(); i++) {
+                                        if (target == i) {
+                                            ClientThread c = list.get(i);
+                                            c.send("file");
+                                            c.send(Integer.toString(number));
+                                            c.send(extractFileName(temp[2]));
+                                            c.sendFile(FILE_PATH);
+                                        }
 
+                                    }
                                 }
                             }
                             int receClient = target + 1;
@@ -182,26 +188,30 @@ public class Server {
                             if (MOF.equals("message")) {
                                 String client = temp[temp.length - 1];
                                 target = getTarget(client);
-                                for (int i = 0; i < list.size(); i++) {
-                                    if (target == i || i == number - 1) {
-                                        continue;
+                                synchronized (this) {
+                                    for (int i = 0; i < list.size(); i++) {
+                                        if (target == i || i == number - 1) {
+                                            continue;
+                                        }
+                                        ClientThread c = list.get(i);
+                                        c.send("@client" + number + ":" + message);
                                     }
-                                    ClientThread c = list.get(i);
-                                    c.send("@client" + number + ":" + message);
                                 }
                             }
                             if (MOF.equals("file")) {
                                 String client = temp[temp.length - 1];
                                 target = getTarget(client);
-                                for (int i = 0; i < list.size(); i++) {
-                                    if (target == i || i == number - 1) {
-                                        continue;
+                                synchronized (this) {
+                                    for (int i = 0; i < list.size(); i++) {
+                                        if (target == i || i == number - 1) {
+                                            continue;
+                                        }
+                                        ClientThread c = list.get(i);
+                                        c.send("file");
+                                        c.send(Integer.toString(number));
+                                        c.send(extractFileName(temp[2]));
+                                        c.sendFile(FILE_PATH);
                                     }
-                                    ClientThread c = list.get(i);
-                                    c.send("file");
-                                    c.send(Integer.toString(number));
-                                    c.send(extractFileName(temp[2]));
-                                    c.sendFile(FILE_PATH);
                                 }
                             }
                             int blockClient = target + 1;
@@ -212,7 +222,6 @@ public class Server {
                             out.flush();
                         }
                     }
-                }
             } catch (EOFException e) {
                 list.remove(this);
                 clientNum--;

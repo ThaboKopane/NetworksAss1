@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.*;
 
 public class Client{
-	static String IDENTIFY_NUMBER;
+	static String folder_Name;
 	static int CONNECT_PORT;
 	Socket socket;
 	ObjectOutputStream out;
@@ -12,13 +12,13 @@ public class Client{
 	private String STORED_FILE;
 	static InetAddress address;
 	public static void main(String[] args) {
-		IDENTIFY_NUMBER = args[0];
+		folder_Name = args[0];
 		CONNECT_PORT = Integer.valueOf(args[1]);
 		try {
 			address = InetAddress.getByName(args[2]);
 		} catch (UnknownHostException unk){System.err.println("Host is unknown fam");}
 
-		mkDir(IDENTIFY_NUMBER);
+		mkDir(folder_Name);
 		new Client().start(CONNECT_PORT);
 	}
 	void start(int port) {
@@ -81,7 +81,7 @@ public class Client{
 						String senderNumber=(String)in.readObject();
 						STORED_FILE = (String)in.readObject();
 						//create file to received path;
-						FILE_TO_RECEIVED = IDENTIFY_NUMBER + "/" + STORED_FILE;
+						FILE_TO_RECEIVED = folder_Name + "/" + STORED_FILE;
 				        byte[] contents = new byte[10000];
 				        //Initialize the FileOutputStream to the output file's full path.
 				        FileOutputStream fos = new FileOutputStream(FILE_TO_RECEIVED);
